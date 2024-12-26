@@ -67,7 +67,7 @@ export const FlagCreationButton = ({
     const projectId = useRequiredPathParam('projectId');
     const showCreateDialog = Boolean(searchParams.get('create'));
     const [openCreateDialog, setOpenCreateDialog] = useState(showCreateDialog);
-
+    
     return (
         <>
             <StyledResponsiveButton

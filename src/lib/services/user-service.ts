@@ -45,6 +45,7 @@ import { PasswordPreviouslyUsedError } from '../error/password-previously-used';
 import { RateLimitError } from '../error/rate-limit-error';
 import type EventEmitter from 'events';
 import { USER_LOGIN } from '../metric-events';
+import { config } from '../util/config-helper';
 
 export interface ICreateUser {
     name?: string;
@@ -413,10 +414,12 @@ class UserService {
             : { username: usernameOrEmail };
 
         let user: IUser | undefined, passwordHash: string | undefined;
+        console.log("test");
         try {
             user = await this.store.getByQuery(idQuery);
             passwordHash = await this.store.getPasswordHash(user.id);
         } catch (error) {}
+        console.log("test");
         if (user && passwordHash) {
             const match = await bcrypt.compare(password, passwordHash);
             if (match) {
@@ -452,6 +455,8 @@ class UserService {
                 return user;
             }
         }
+        console.log("test");
+
         throw new PasswordMismatch(
             `The combination of password and username you provided is invalid. If you have forgotten your password, visit ${this.baseUriPath}/forgotten-password or get in touch with your instance administrator.`,
         );
@@ -494,6 +499,50 @@ class UserService {
                         email,
                         name,
                         rootRole: rootRole || RoleName.EDITOR,
+                    },
+                    SYSTEM_USER_AUDIT,
+                );
+            } else {
+                throw e;
+            }
+        }
+        const loginOrder = await this.store.successfullyLogin(user);
+        this.eventBus.emit(USER_LOGIN, { loginOrder });
+        return user;
+    }
+
+    async loginCopartUser(
+        email: string,
+        password: string,
+        autoCreateUser: boolean = true,
+    ): Promise<IUser> {
+        return this.loginUserCopartHelper(email, password, autoCreateUser );
+    }
+
+    async loginUserCopartHelper(
+        email: string,
+        password: string,
+        autoCreate: boolean = false): Promise<IUser> {
+        let user: IUser;
+
+        try {
+            await this.authenticateCopartUser(email, password);
+            const name: string = email.split(".")[0];
+            user = await this.store.getByQuery({ email });
+            // Update user if autCreate is enabled.
+            if (user.name !== name) {
+                user = await this.store.update(user.id, { name, email });
+            }
+        } catch (e) {
+            console.log(e);
+            // User does not exists. Create if 'autoCreate' is enabled
+            const name: string = email.split(".")[0];
+            if (autoCreate) {
+                user = await this.createUser(
+                    {
+                        email,
+                        name,
+                        rootRole: RoleName.EDITOR,
                     },
                     SYSTEM_USER_AUDIT,
                 );
@@ -569,7 +618,7 @@ class UserService {
         return {
             token,
             createdBy,
-            email: user.email,
+            email: user.email || '',
             name: user.name,
             id: user.id,
             role: {
@@ -633,6 +682,34 @@ class UserService {
             resetLink.toString(),
         );
         return resetLink;
+    }
+
+    async authenticateCopartUser(email: string, password: string) {
+        try {
+
+            const authAPIUser: string = config.get('auth.user');
+            const authAPIPassword: string = config.get('auth.password') || process.env.COPART_AUTH_PASSWORD;
+            const basicAuth: string = Buffer.from(`${authAPIUser}:${authAPIPassword}`).toString('base64');
+            const res: Response = await fetch(config.get('auth.url'), {
+                method: 'POST',
+                headers:{
+                  'Content-Type': 'application/x-www-form-urlencoded',
+                  'Authorization': `Basic ${basicAuth}`
+                },    
+                body: new URLSearchParams({
+                    'username': email,
+                    'password': password,
+                    'grant_type': 'password'
+                })
+            });
+           if (!res.ok) {
+                throw new PasswordMismatch("Invalid crtedentials")
+           }
+        } catch(e) {
+            console.log("auth error ", e);
+            throw e;
+        }
+        
     }
 }
 

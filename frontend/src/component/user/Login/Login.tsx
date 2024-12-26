@@ -17,6 +17,7 @@ const StyledDiv = styled('div')(({ theme }) => ({
 
 const StyledHeader = styled('h2')(({ theme }) => ({
     fontSize: theme.fontSizes.mainHeader,
+    marginTop: '65px',
     marginBottom: theme.spacing(2),
     textAlign: 'center',
 }));

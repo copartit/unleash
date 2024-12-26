@@ -36,7 +36,7 @@ export class SimplePasswordProvider extends Controller {
         this.route({
             method: 'post',
             path: '/login',
-            handler: this.login,
+            handler: this.loginCopartUser,
             permission: NONE,
             middleware: [
                 openApiService.validPath({
@@ -66,6 +66,23 @@ export class SimplePasswordProvider extends Controller {
             userAgent,
             ip: req.ip,
         });
+        req.session.user = user;
+        this.openApiService.respondWithValidation(
+            200,
+            res,
+            userSchema.$id,
+            serializeDates(user),
+        );
+    }
+
+    async loginCopartUser(
+        req: IAuthRequest<void, void, LoginSchema>,
+        res: Response<UserSchema>,
+    ): Promise<void> {
+        const { username, password } = req.body;
+        const userAgent = req.get('user-agent');
+
+        const user = await this.userService.loginCopartUser(username, password);
         req.session.user = user;
         this.openApiService.respondWithValidation(
             200,

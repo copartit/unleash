@@ -58,10 +58,10 @@ const Authentication = ({
         content = (
             <>
                 <PasswordAuth authDetails={authDetails} redirect={redirect} />
-                <ConditionallyRender
+                {/* <ConditionallyRender
                     condition={!authDetails.defaultHidden}
                     show={<SecondaryLoginActions />}
-                />
+                /> */}
             </>
         );
     } else if (authDetails.type === SIMPLE_TYPE) {

@@ -3022,6 +3022,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"cloud-config-client@npm:^1.6.2":
+  version: 1.6.2
+  resolution: "cloud-config-client@npm:1.6.2"
+  checksum: 10c0/e121659128e3ef50589ac59e9ccbf4b0d83f41e53028574daacde9eafc8855f24add8a4830376680c13836bafd3a5fc93d3ff5e7d53663d750c4089ddb45f206
+  languageName: node
+  linkType: hard
+
 "co@npm:^4.6.0":
   version: 4.6.0
   resolution: "co@npm:4.6.0"
@@ -9284,6 +9291,7 @@ __metadata:
     ajv-formats: "npm:^2.1.1"
     async: "npm:^3.2.4"
     bcryptjs: "npm:^2.4.3"
+    cloud-config-client: "npm:^1.6.2"
     compression: "npm:^1.7.4"
     concurrently: "npm:^8.0.1"
     connect-session-knex: "npm:^5.0.0"

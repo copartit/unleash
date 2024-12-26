@@ -2,24 +2,24 @@ import { start } from './lib/server-impl';
 import { createConfig } from './lib/create-config';
 import { LogLevel } from './lib/logger';
 import { ApiTokenType } from './lib/types/models/api-token';
+import { loadConfig, config } from './lib/util/config-helper';
+
 
 process.nextTick(async () => {
     try {
+        await loadConfig();
         await start(
             createConfig({
-                db: process.env.DATABASE_URL
-                    ? undefined
-                    : {
-                          user: 'unleash_user',
-                          password: 'password',
-                          host: 'localhost',
-                          port: 5432,
-                          database:
-                              process.env.UNLEASH_DATABASE_NAME || 'unleash',
-                          schema: process.env.UNLEASH_DATABASE_SCHEMA,
-                          ssl: false,
-                          applicationName: 'unleash',
-                      },
+                db: {
+                    user: config.get('pg.datasource.username'),
+                    password: config.get('pg.datasource.password'),
+                    host: config.get('pg.datasource.host'),
+                    port: config.get('pg.datasource.port'),
+                    database: config.get('pg.datasource.db'),
+                    schema: config.get('pg.datasource.schema'),
+                    ssl: false,
+                    applicationName: 'unleash-sharedservices',
+                },
                 server: {
                     enableRequestLogger: true,
                     baseUriPath: '',

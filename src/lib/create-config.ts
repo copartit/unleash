@@ -509,7 +509,6 @@ export function resolveIsOss(
 
 export function createConfig(options: IUnleashOptions): IUnleashConfig {
     let extraDbOptions = {};
-
     if (options.databaseUrl) {
         extraDbOptions = parse(options.databaseUrl);
     } else if (process.env.DATABASE_URL) {
