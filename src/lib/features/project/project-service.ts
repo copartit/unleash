@@ -362,7 +362,7 @@ export default class ProjectService {
             return [];
         },
     ): Promise<ProjectCreated> {
-        await this.validateProjectLimit();
+       // await this.validateProjectLimit();
 
         const validateData = async () => {
             await this.validateProjectEnvironments(newProject.environments);

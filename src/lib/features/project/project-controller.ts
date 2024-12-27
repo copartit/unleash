@@ -1,12 +1,14 @@
 import type { Response } from 'express';
 import Controller from '../../routes/controller';
 import {
+    CREATE_PROJECT,
     type IArchivedQuery,
     type IFlagResolver,
     type IProjectParam,
     type IUnleashConfig,
     type IUnleashServices,
     NONE,
+    type ProjectCreated,
     serializeDates,
 } from '../../types';
 import ProjectFeaturesController from '../feature-toggle/feature-toggle-controller';
@@ -15,6 +17,7 @@ import ProjectHealthReport from '../../routes/admin-api/project/health-report';
 import type ProjectService from './project-service';
 import VariantsController from '../../routes/admin-api/project/variants';
 import {
+    createRequestSchema,
     createResponseSchema,
     type DeprecatedProjectOverviewSchema,
     deprecatedProjectOverviewSchema,
@@ -23,6 +26,8 @@ import {
     type ProjectDoraMetricsSchema,
     projectDoraMetricsSchema,
     projectOverviewSchema,
+    projectSchema,
+    type ProjectSchema,
     type ProjectsSchema,
     projectsSchema,
 } from '../../openapi';
@@ -94,6 +99,13 @@ export default class ProjectController extends Controller {
                     },
                 }),
             ],
+        });
+
+        this.route({
+            path: '',
+            method: 'post',
+            handler: this.createProject,
+            permission: CREATE_PROJECT,
         });
 
         this.route({
@@ -254,7 +266,7 @@ export default class ProjectController extends Controller {
         const { user } = req;
         const projects = await this.projectService.getProjects(
             {
-                id: 'default',
+                id: undefined,
             },
             user.id,
         );
@@ -268,6 +280,18 @@ export default class ProjectController extends Controller {
             projectsSchema.$id,
             { version: 1, projects: serializeDates(projectsWithOwners) },
         );
+    }
+
+    async createProject(
+        req: IAuthRequest<undefined, any, any, any>,
+        res: Response<ProjectSchema>,
+    ): Promise<void> {
+        const data: ProjectCreated = await this.projectService.createProject(
+            req.body,
+            req.user,
+            req.audit,
+        );
+        res.status(201).json(data)
     }
 
     async getDeprecatedProjectOverview(
