@@ -1,5 +1,37 @@
 import type { Response } from 'express';
+import type { Db } from '../../db/db';
+import { createKnexTransactionStarter } from '../../db/transaction';
+import {
+    createResponseSchema,
+    type DeprecatedProjectOverviewSchema,
+    deprecatedProjectOverviewSchema,
+    outdatedSdksSchema,
+    type OutdatedSdksSchema,
+    type ProjectDoraMetricsSchema,
+    projectDoraMetricsSchema,
+    projectOverviewSchema,
+    type ProjectSchema,
+    type ProjectsSchema,
+    projectsSchema
+} from '../../openapi';
+import { projectApplicationsQueryParameters } from '../../openapi/spec/project-applications-query-parameters';
+import {
+    projectApplicationsSchema,
+    type ProjectApplicationsSchema,
+} from '../../openapi/spec/project-applications-schema';
+import {
+    projectFlagCreatorsSchema,
+    type ProjectFlagCreatorsSchema,
+} from '../../openapi/spec/project-flag-creators-schema';
+import type { ProjectOverviewSchema } from '../../openapi/spec/project-overview-schema';
+import { getStandardResponses } from '../../openapi/util/standard-responses';
+import { ProjectApiTokenController } from '../../routes/admin-api/project/api-token';
+import ProjectHealthReport from '../../routes/admin-api/project/health-report';
+import ProjectArchiveController from '../../routes/admin-api/project/project-archive';
+import VariantsController from '../../routes/admin-api/project/variants';
 import Controller from '../../routes/controller';
+import type { IAuthRequest } from '../../routes/unleash-types';
+import type { OpenApiService } from '../../services';
 import {
     CREATE_PROJECT,
     type IArchivedQuery,
@@ -11,49 +43,15 @@ import {
     type ProjectCreated,
     serializeDates,
 } from '../../types';
-import ProjectFeaturesController from '../feature-toggle/feature-toggle-controller';
-import EnvironmentsController from '../project-environments/environments';
-import ProjectHealthReport from '../../routes/admin-api/project/health-report';
-import type ProjectService from './project-service';
-import VariantsController from '../../routes/admin-api/project/variants';
-import {
-    createRequestSchema,
-    createResponseSchema,
-    type DeprecatedProjectOverviewSchema,
-    deprecatedProjectOverviewSchema,
-    outdatedSdksSchema,
-    type OutdatedSdksSchema,
-    type ProjectDoraMetricsSchema,
-    projectDoraMetricsSchema,
-    projectOverviewSchema,
-    projectSchema,
-    type ProjectSchema,
-    type ProjectsSchema,
-    projectsSchema,
-} from '../../openapi';
-import { getStandardResponses } from '../../openapi/util/standard-responses';
-import type { OpenApiService } from '../../services';
-import type { IAuthRequest } from '../../routes/unleash-types';
-import { ProjectApiTokenController } from '../../routes/admin-api/project/api-token';
-import ProjectArchiveController from '../../routes/admin-api/project/project-archive';
-import { createKnexTransactionStarter } from '../../db/transaction';
-import type { Db } from '../../db/db';
 import DependentFeaturesController from '../dependent-features/dependent-features-controller';
-import type { ProjectOverviewSchema } from '../../openapi/spec/project-overview-schema';
-import {
-    projectApplicationsSchema,
-    type ProjectApplicationsSchema,
-} from '../../openapi/spec/project-applications-schema';
-import { projectApplicationsQueryParameters } from '../../openapi/spec/project-applications-query-parameters';
-import { normalizeQueryParams } from '../feature-search/search-utils';
-import ProjectInsightsController from '../project-insights/project-insights-controller';
 import FeatureLifecycleController from '../feature-lifecycle/feature-lifecycle-controller';
+import { normalizeQueryParams } from '../feature-search/search-utils';
+import ProjectFeaturesController from '../feature-toggle/feature-toggle-controller';
 import type ClientInstanceService from '../metrics/instance/instance-service';
-import {
-    projectFlagCreatorsSchema,
-    type ProjectFlagCreatorsSchema,
-} from '../../openapi/spec/project-flag-creators-schema';
+import EnvironmentsController from '../project-environments/environments';
+import ProjectInsightsController from '../project-insights/project-insights-controller';
 import ProjectStatusController from '../project-status/project-status-controller';
+import type ProjectService from './project-service';
 
 export default class ProjectController extends Controller {
     private projectService: ProjectService;

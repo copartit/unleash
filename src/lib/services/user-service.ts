@@ -414,12 +414,10 @@ class UserService {
             : { username: usernameOrEmail };
 
         let user: IUser | undefined, passwordHash: string | undefined;
-        console.log("test");
         try {
             user = await this.store.getByQuery(idQuery);
             passwordHash = await this.store.getPasswordHash(user.id);
         } catch (error) {}
-        console.log("test");
         if (user && passwordHash) {
             const match = await bcrypt.compare(password, passwordHash);
             if (match) {
@@ -455,7 +453,6 @@ class UserService {
                 return user;
             }
         }
-        console.log("test");
 
         throw new PasswordMismatch(
             `The combination of password and username you provided is invalid. If you have forgotten your password, visit ${this.baseUriPath}/forgotten-password or get in touch with your instance administrator.`,
