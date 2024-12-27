@@ -125,7 +125,6 @@ export const ProjectAccessAssign = ({
 
     const { setToastData, setToastApiError } = useToast();
     const navigate = useNavigate();
-
     const options = [
         ...groups
             .filter(
@@ -231,6 +230,7 @@ export const ProjectAccessAssign = ({
                 );
             }
             refetchProjectAccess();
+            
             navigate(GO_BACK);
             setToastData({
                 text: `${selectedOptions.length} ${

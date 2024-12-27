@@ -10,7 +10,7 @@ process.nextTick(async () => {
         await loadConfig();
         await start(
             createConfig({
-                enterpriseVersion: 'pro',
+                enterpriseVersion: 'enterprise',
                 db: {
                     user: config.get('pg.datasource.username'),
                     password: config.get('pg.datasource.password'),

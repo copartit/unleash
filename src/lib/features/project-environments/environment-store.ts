@@ -313,11 +313,15 @@ export default class EnvironmentStore implements IEnvironmentStore {
         env: Pick<IEnvironment, 'type' | 'protected'>,
         name: string,
     ): Promise<IEnvironment> {
+        const q = this.db<IEnvironmentsTable>(TABLE)
+        .update(snakeCaseKeys(env))
+        .where({ name, protected: false })
+        .returning<IEnvironmentsTable>(COLUMNS);
+
         const updatedEnv = await this.db<IEnvironmentsTable>(TABLE)
             .update(snakeCaseKeys(env))
             .where({ name, protected: false })
             .returning<IEnvironmentsTable>(COLUMNS);
-
         return mapRow(updatedEnv[0]);
     }
 

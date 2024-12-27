@@ -39,7 +39,6 @@ const ResponsiveButton: React.FC<IResponsiveButtonProps> = ({
     ...rest
 }) => {
     const smallScreen = useMediaQuery(`(max-width:${maxWidth})`);
-
     return (
         <ConditionallyRender
             condition={smallScreen}

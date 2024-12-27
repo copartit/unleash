@@ -21,7 +21,6 @@ export default class FlagResolver implements IFlagResolver {
 
     getAll(context?: IFlagContext): IFlags {
         const flags: IFlags = { ...this.experiments };
-
         Object.keys(flags).forEach((flagName: IFlagKey) => {
             const flag = flags[flagName];
             if (typeof flag === 'boolean') {

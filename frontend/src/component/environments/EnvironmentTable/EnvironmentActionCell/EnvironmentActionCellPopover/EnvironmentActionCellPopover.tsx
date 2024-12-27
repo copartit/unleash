@@ -113,7 +113,7 @@ export const EnvironmentActionCellPopover = ({
                             </StyledMenuItem>
                         )}
                     </PermissionHOC>
-                    <PermissionHOC permission={ADMIN}>
+                    {/* <PermissionHOC permission={ADMIN}>
                         {({ hasAccess }) => (
                             <StyledMenuItem
                                 onClick={() => {
@@ -132,7 +132,7 @@ export const EnvironmentActionCellPopover = ({
                                 </ListItemText>
                             </StyledMenuItem>
                         )}
-                    </PermissionHOC>
+                    </PermissionHOC> */}
                     <PermissionHOC permission={UPDATE_ENVIRONMENT}>
                         {({ hasAccess }) => (
                             <StyledMenuItem

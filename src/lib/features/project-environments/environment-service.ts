@@ -2,6 +2,7 @@ import {
     DefaultStrategyUpdatedEvent,
     type IAuditUser,
     type IEnvironment,
+    type IEnvironmentCreate,
     type IEnvironmentStore,
     type IFeatureEnvironmentStore,
     type IFeatureStrategiesStore,
@@ -81,6 +82,20 @@ export default class EnvironmentService {
         return this.environmentStore.getProjectEnvironments(projectId);
     }
 
+    async createEnvironments(env: IEnvironmentCreate) {
+        const sortOrder = await this.environmentStore.getMaxSortOrder();
+        env.sortOrder = sortOrder + 1;
+        return await this.environmentStore.create(env);
+    }
+
+    async updateEnvironment(env: IEnvironment, name: string) {
+        await this.environmentStore.updateProperty(name, 'type', env.type);
+    }
+
+    async deleteEnvironment(name: string) {
+        await this.environmentStore.delete(name);
+    }
+
     async updateSortOrder(sortOrder: ISortOrder): Promise<void> {
         await sortOrderSchema.validateAsync(sortOrder);
         await Promise.all(
@@ -97,6 +112,14 @@ export default class EnvironmentService {
             return this.environmentStore.updateProperty(name, 'enabled', value);
         }
         throw new NotFoundError(`Could not find environment ${name}`);
+    }
+
+    async validateEnvName(name: string): Promise<boolean> {
+        const exists = await this.environmentStore.exists(name);
+        if (exists) {
+            throw new NameExistsError(`An environment with the name ${name} already exists`);
+        }
+        return exists;
     }
 
     async addEnvironmentToProject(

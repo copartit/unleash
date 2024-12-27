@@ -37,9 +37,11 @@ import {
     type IArchivedQuery,
     type IFlagResolver,
     type IProjectParam,
+    type IProjectUpdate,
     type IUnleashConfig,
     type IUnleashServices,
     NONE,
+    PROJECT_USER_ACCESS_WRITE,
     type ProjectCreated,
     serializeDates,
 } from '../../types';
@@ -52,6 +54,7 @@ import EnvironmentsController from '../project-environments/environments';
 import ProjectInsightsController from '../project-insights/project-insights-controller';
 import ProjectStatusController from '../project-status/project-status-controller';
 import type ProjectService from './project-service';
+import type { AccessWithRoles } from '../../services/access-service';
 
 export default class ProjectController extends Controller {
     private projectService: ProjectService;
@@ -107,6 +110,27 @@ export default class ProjectController extends Controller {
         });
 
         this.route({
+            path: '/:projectId',
+            method: 'put',
+            handler: this.updateProject,
+            permission: CREATE_PROJECT,
+        });
+
+        this.route({
+            path: '/archive/:projectId',
+            method: 'post',
+            handler: this.archiveProject,
+            permission: CREATE_PROJECT,
+        });
+
+        this.route({
+            path: '/revive/:projectId',
+            method: 'post',
+            handler: this.reviveProject,
+            permission: CREATE_PROJECT,
+        });
+
+        this.route({
             method: 'get',
             path: '/:projectId',
             handler: this.getDeprecatedProjectOverview,
@@ -147,6 +171,34 @@ export default class ProjectController extends Controller {
                     },
                 }),
             ],
+        });
+
+        this.route({
+            method: 'get',
+            path: '/:projectId/access',
+            handler: this.getAccess,
+            permission: NONE,
+        });
+
+        this.route({
+            method: 'post',
+            path: '/:projectId/access',
+            handler: this.addAccess,
+            permission: PROJECT_USER_ACCESS_WRITE,
+        });
+
+        this.route({
+            method: 'put',
+            path: '/:projectId/users/:userId/roles',
+            handler: this.updateRoles,
+            permission: PROJECT_USER_ACCESS_WRITE,
+        });
+
+        this.route({
+            method: 'delete',
+            path: '/:projectId/users/:userId/roles',
+            handler: this.deleteRoles,
+            permission: PROJECT_USER_ACCESS_WRITE,
         });
 
         /** @deprecated use project insights instead */
@@ -262,9 +314,11 @@ export default class ProjectController extends Controller {
         res: Response<ProjectsSchema>,
     ): Promise<void> {
         const { user } = req;
+        const { archived } = req.query
         const projects = await this.projectService.getProjects(
             {
                 id: undefined,
+                archived,
             },
             user.id,
         );
@@ -280,6 +334,44 @@ export default class ProjectController extends Controller {
         );
     }
 
+    async getAccess(
+        req: IAuthRequest<IProjectParam, any, any, any>,
+        res: Response<AccessWithRoles>
+    ): Promise<void> {
+        const { projectId } = req.params
+        const data = await this.projectService.getAccessToProject(projectId);
+        res.status(200).json(data)
+    }
+
+    async addAccess(
+        req: IAuthRequest<IProjectParam, any, any, any>,
+        res: Response<void>
+    ): Promise<void> {
+        const { projectId } = req.params
+        const body = req.body;
+        await this.projectService.addAccess(projectId, body.roles, body.groups, body.users, req.audit);
+        res.status(204).json();
+    }
+
+    async updateRoles(
+        req: IAuthRequest<{projectId: string, userId: number}, any, any, any>,
+        res: Response<void>
+    ): Promise<void> {
+        const { projectId, userId } = req.params
+        const body = req.body;
+        await this.projectService.setRolesForUser(projectId, userId,  body.roles, req.audit);
+        res.status(204).json();
+    }
+
+    async deleteRoles(
+        req: IAuthRequest<{projectId: string, userId: number}, any, any, any>,
+        res: Response<void>
+    ): Promise<void> {
+        const { projectId, userId } = req.params
+        await this.projectService.removeUserAccess(projectId, userId, req.audit);
+        res.status(204).json();
+    }
+
     async createProject(
         req: IAuthRequest<undefined, any, any, any>,
         res: Response<ProjectSchema>,
@@ -290,6 +382,41 @@ export default class ProjectController extends Controller {
             req.audit,
         );
         res.status(201).json(data)
+    }
+
+    async updateProject(
+        req: IAuthRequest<any, any, IProjectUpdate, any>,
+        res: Response<void>,
+    ): Promise<void> {
+        await this.projectService.updateProject(
+            req.body,
+            req.audit,
+        );
+        res.status(204).json()
+    }
+
+    async archiveProject(
+        req: IAuthRequest<IProjectParam, any, any, any>,
+        res: Response<void>,
+    ): Promise<void> {
+        const { projectId } = req.params; 
+        await this.projectService.archiveProject(
+            projectId,
+            req.audit,
+        );
+        res.status(204).json()
+    }
+
+    async reviveProject(
+        req: IAuthRequest<IProjectParam, any, any, any>,
+        res: Response<void>,
+    ): Promise<void> {
+        const { projectId } = req.params; 
+        await this.projectService.reviveProject(
+            projectId,
+            req.audit,
+        );
+        res.status(204).json()
     }
 
     async getDeprecatedProjectOverview(

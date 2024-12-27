@@ -106,7 +106,7 @@ export const EnvironmentActionCell = ({
                 setOpen={setDeprecateToggleDialog}
                 onConfirm={onDeprecateToggleConfirm}
             />
-            <EnvironmentCloneModal
+            {/* <EnvironmentCloneModal
                 environment={environment}
                 open={cloneModal}
                 setOpen={setCloneModal}
@@ -114,7 +114,7 @@ export const EnvironmentActionCell = ({
                     setNewToken(token);
                     setTokenDialog(true);
                 }}
-            />
+            /> */}
             <EnvironmentTokenDialog
                 open={tokenDialog}
                 setOpen={setTokenDialog}

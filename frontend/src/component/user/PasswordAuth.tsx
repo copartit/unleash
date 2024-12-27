@@ -126,7 +126,7 @@ const PasswordAuth: VFC<IPasswordAuthProps> = ({ authDetails, redirect }) => {
 
                         <StyledDiv>
                             <TextField
-                                label='Username or email'
+                                label='email'
                                 name='username'
                                 id='username'
                                 type='text'

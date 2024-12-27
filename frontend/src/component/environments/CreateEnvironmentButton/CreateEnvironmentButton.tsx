@@ -11,7 +11,6 @@ import { useUiFlag } from 'hooks/useUiFlag';
 export const CreateEnvironmentButton = () => {
     const navigate = useNavigate();
     const disabled = !useUiFlag('EEA');
-
     const endIcon = disabled ? (
         <ThemeMode
             darkmode={<ProPlanIconLight />}

@@ -25,6 +25,7 @@ import {
     environmentsProjectSchema,
     type EnvironmentsProjectSchema,
 } from '../../openapi/spec/environments-project-schema';
+import { IEnvironment } from '../../internals';
 
 interface EnvironmentParam {
     name: string;
@@ -71,6 +72,34 @@ export class EnvironmentsController extends Controller {
                     },
                 }),
             ],
+        });
+
+        this.route({
+            method: 'post',
+            path: '',
+            handler: this.createEnvironment,
+            permission: ADMIN,
+        });
+
+        this.route({
+            method: 'put',
+            path: '/update/:name',
+            handler: this.updateEnvironment,
+            permission: ADMIN,
+        });
+
+        this.route({
+            method: 'delete',
+            path: '/:name',
+            handler: this.deleteEnvironment,
+            permission: ADMIN,
+        });
+
+        this.route({
+            method: 'post',
+            path: '/validate',
+            handler: this.validateEnvironment,
+            permission: ADMIN,
         });
 
         this.route({
@@ -175,6 +204,40 @@ export class EnvironmentsController extends Controller {
                 }),
             ],
         });
+    }
+
+    async createEnvironment(
+        req: Request,
+        res: Response<IEnvironment>,
+    ): Promise<void> {
+        const createRes = await this.service.createEnvironments(req.body);
+        res.status(201).json(createRes);
+    }
+
+    async updateEnvironment(
+        req: Request<EnvironmentParam>,
+        res: Response<void>,
+    ): Promise<void> {
+        const { name } = req.params;
+        await this.service.updateEnvironment(req.body, name);
+        res.status(200).json();
+    }
+
+    async deleteEnvironment(
+        req: Request<EnvironmentParam>,
+        res: Response<void>,
+    ): Promise<void> {
+        const { name } = req.params;
+        await this.service.deleteEnvironment(name);
+        res.status(204).json();
+    }
+
+    async validateEnvironment(
+        req: Request,
+        res: Response<boolean>,
+    ): Promise<void> {
+        const nameExists = await this.service.validateEnvName(req.body);
+        res.status(201).json(nameExists);
     }
 
     async getAllEnvironments(

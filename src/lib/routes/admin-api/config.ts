@@ -148,7 +148,6 @@ class ConfigController extends Controller {
         const expFlags = this.config.flagResolver.getAll({
             email: req.user.email,
         });
-
         const flags = {
             ...this.config.ui.flags,
             ...expFlags,

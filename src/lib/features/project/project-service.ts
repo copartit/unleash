@@ -738,6 +738,7 @@ export default class ProjectService {
         userId: number,
         auditUser: IAuditUser,
     ): Promise<void> {
+        await this.validateActiveProject(projectId);
         const existingRoles = await this.accessService.getProjectRolesForUser(
             projectId,
             userId,
@@ -1011,6 +1012,7 @@ export default class ProjectService {
         newRoles: number[],
         auditUser: IAuditUser,
     ): Promise<void> {
+        await this.validateActiveProject(projectId);
         const currentRoles = await this.accessService.getProjectRolesForUser(
             projectId,
             userId,
