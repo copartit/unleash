@@ -173,6 +173,7 @@ class ConfigController extends Controller {
             maxSessionsCount,
         };
 
+
         this.openApiService.respondWithValidation(
             200,
             res,
